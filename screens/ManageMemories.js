@@ -2,14 +2,16 @@ import { useContext, useLayoutEffect } from 'react';
 import IconButton from '../components/UI/IconButton'
 import { GlobalStyles } from '../constants/styles';
 import { View, StyleSheet } from 'react-native';
-import Button from '../components/UI/Button';
 import { MemoriesContext } from '../store/MemoriesContext';
+import MemoryForm from '../components/ManageMemory/MemoryForm';
 
 function ManageMemories({ route, navigation }) {
     const memoriesCtx = useContext(MemoriesContext);
 
     const editedMemoryId = route.params?.memoryId;
     const isEditing = !!editedMemoryId;
+
+    const selectedMemory = memoriesCtx.memories.find((memory) => memory.id === editedMemoryId);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -26,11 +28,11 @@ function ManageMemories({ route, navigation }) {
         navigation.goBack();
     }
 
-    function confirmHandler() {
+    function confirmHandler(memoryData) {
         if (isEditing) {
-            memoriesCtx.updateMemory(editedMemoryId, { title: 'Updated Title', description: 'Updated Description', photo: '', date: new Date() });
+            memoriesCtx.updateMemory(editedMemoryId, memoryData);
         } else {
-            memoriesCtx.addMemory({ title: 'Title', photo: '', description: 'Description', date: new Date() });
+            memoriesCtx.addMemory(memoryData);
         }
 
         navigation.goBack();
@@ -38,10 +40,13 @@ function ManageMemories({ route, navigation }) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.buttons}>
-                <Button style={styles.button} mode="flat" onPress={cancelHandler}>Cancel</Button>
-                <Button style={styles.button} onPress={confirmHandler}>{isEditing ? "Update" : "Add"}</Button>
-            </View>
+            <MemoryForm
+                onCancel={cancelHandler}
+                isEditing={isEditing}
+                submitButtonLabel={isEditing ? 'Update' : 'Add'}
+                onSubmit={confirmHandler}
+                defaultValues={selectedMemory}
+            />
             {isEditing &&
                 <View style={styles.deleteContainer}>
                     <IconButton icon="trash" color={GlobalStyles.colors.error500} size={36} onPress={deleteMemoryHandler} />
@@ -58,15 +63,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 24,
         backgroundColor: GlobalStyles.colors.primary800
-    },
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    button: {
-        minWidth: 120,
-        marginHorizontal: 8
     },
     deleteContainer: {
         marginTop: 16,
