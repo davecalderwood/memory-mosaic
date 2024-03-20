@@ -1,8 +1,9 @@
-import { StyleSheet, View, Keyboard, TouchableWithoutFeedback, Text } from "react-native";
+import { StyleSheet, View, Keyboard, Text } from "react-native";
 import Input from "./Input";
 import { useState } from "react";
 import Button from "../UI/Button";
 import { GlobalStyles } from "../../constants/styles";
+import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 
 function MemoryForm({ onCancel, onSubmit, submitButtonLabel, defaultValues }) {
@@ -60,49 +61,51 @@ function MemoryForm({ onCancel, onSubmit, submitButtonLabel, defaultValues }) {
     const formIsInvalid = !inputs.title.isValid || !inputs.description.isValid || !inputs.date.isValid
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View style={styles.form}>
-                <Input
-                    label="Title"
-                    invalid={!inputs.title.isValid}
-                    textInputConfig={{
-                        onChangeText: inputChangedHandler.bind(this, 'title'),
-                        value: inputs.title.value,
-                        placeholder: "Give your memory a name!"
-                    }}
-                />
+        <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.form}>
+                    <Input
+                        label="Title"
+                        invalid={!inputs.title.isValid}
+                        textInputConfig={{
+                            onChangeText: inputChangedHandler.bind(this, 'title'),
+                            value: inputs.title.value,
+                            placeholder: "Give your memory a name!"
+                        }}
+                    />
 
-                <Input label="Photo" />
+                    <Input label="Photo" />
 
-                <Input
-                    label="Description"
-                    invalid={!inputs.description.isValid}
-                    textInputConfig={{
-                        onChangeText: inputChangedHandler.bind(this, 'description'),
-                        value: inputs.description.value,
-                        placeholder: "Describe the Memory!",
-                        multiline: true
-                    }} />
+                    <Input
+                        label="Description"
+                        invalid={!inputs.description.isValid}
+                        textInputConfig={{
+                            onChangeText: inputChangedHandler.bind(this, 'description'),
+                            value: inputs.description.value,
+                            placeholder: "Describe the Memory!",
+                            multiline: true
+                        }} />
 
-                <Input
-                    label="Date"
-                    invalid={!inputs.date.isValid}
-                    textInputConfig={{
-                        onChangeText: inputChangedHandler.bind(this, 'date'),
-                        value: inputs.date.value,
-                        placeholder: 'YYYY-MM-DD',
-                        maxLength: 10,
-                        onChangeText: () => { }
-                    }} />
+                    <Input
+                        label="Date"
+                        invalid={!inputs.date.isValid}
+                        textInputConfig={{
+                            onChangeText: inputChangedHandler.bind(this, 'date'),
+                            value: inputs.date.value,
+                            placeholder: 'YYYY-MM-DD',
+                            maxLength: 10,
+                            onChangeText: () => { }
+                        }} />
 
-                {formIsInvalid && <Text style={styles.errorText}>Invalid input values - please check your entered date</Text>}
+                    {formIsInvalid && <Text style={styles.errorText}>Invalid input values - please check your entered date</Text>}
 
-                <View style={styles.buttons}>
-                    <Button style={styles.button} mode="flat" onPress={onCancel}>Cancel</Button>
-                    <Button style={styles.button} onPress={submitHandler}>{submitButtonLabel}</Button>
                 </View>
+            </TouchableWithoutFeedback>
+            <View style={styles.buttons}>
+                <Button style={styles.button} mode="flat" onPress={onCancel}>Cancel</Button>
+                <Button style={styles.button} onPress={submitHandler}>{submitButtonLabel}</Button>
             </View>
-        </TouchableWithoutFeedback>
+        </ScrollView>
     )
 }
 
