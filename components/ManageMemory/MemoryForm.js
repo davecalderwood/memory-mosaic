@@ -1,4 +1,4 @@
-import { StyleSheet, View, Keyboard, Text, Image } from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Text, Image, Platform } from "react-native";
 import Input from "./Input";
 import { useState } from "react";
 import Button from "../UI/Button";
@@ -100,60 +100,71 @@ function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultV
     const formIsInvalid = !inputs.title.isValid || !inputs.description.isValid || !inputs.date.isValid
 
     return (
-        <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-            {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}> */}
-            <View style={styles.form}>
-                <Input
-                    label="Title"
-                    invalid={!inputs.title.isValid}
-                    textInputConfig={{
-                        onChangeText: inputChangedHandler.bind(this, 'title'),
-                        value: inputs.title.value,
-                        placeholder: "Give your memory a name!"
-                    }}
-                />
 
-                {/* {inputs.photo && <Image source={{ uri: inputs.photo }} style={styles.photoPreview} />} */}
-                {inputs.photo && <Image source={{ uri: isEditing ? inputs.photo.value : inputs.photo }} style={styles.photoPreview} />}
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.container}
+            keyboardVerticalOffset={150}
+        >
+            <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+                {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}> */}
+                <View style={styles.form}>
+                    <Input
+                        label="Title"
+                        invalid={!inputs.title.isValid}
+                        textInputConfig={{
+                            onChangeText: inputChangedHandler.bind(this, 'title'),
+                            value: inputs.title.value,
+                            placeholder: "Give your memory a name!"
+                        }}
+                    />
 
-                <Button onPress={selectPhoto} title="Select Photo" />
+                    {/* {inputs.photo && <Image source={{ uri: inputs.photo }} style={styles.photoPreview} />} */}
+                    {inputs.photo && <Image source={{ uri: isEditing ? inputs.photo.value : inputs.photo }} style={styles.photoPreview} />}
 
-                <Input
-                    label="Description"
-                    invalid={!inputs.description.isValid}
-                    textInputConfig={{
-                        onChangeText: inputChangedHandler.bind(this, 'description'),
-                        value: inputs.description.value,
-                        placeholder: "Describe the Memory!",
-                        multiline: true
-                    }} />
+                    <Button onPress={selectPhoto} title="Select Photo" />
 
-                <Input
-                    label="Date"
-                    invalid={!inputs.date.isValid}
-                    textInputConfig={{
-                        onChangeText: inputChangedHandler.bind(this, 'date'),
-                        value: inputs.date.value,
-                        placeholder: 'YYYY-MM-DD',
-                        maxLength: 10,
-                        onChangeText: () => { }
-                    }} />
+                    <Input
+                        label="Description"
+                        invalid={!inputs.description.isValid}
+                        textInputConfig={{
+                            onChangeText: inputChangedHandler.bind(this, 'description'),
+                            value: inputs.description.value,
+                            placeholder: "Describe the Memory!",
+                            multiline: true
+                        }} />
 
-                {formIsInvalid && <Text style={styles.errorText}>Invalid input values - please check your entered date</Text>}
+                    <Input
+                        label="Date"
+                        invalid={!inputs.date.isValid}
+                        textInputConfig={{
+                            onChangeText: inputChangedHandler.bind(this, 'date'),
+                            value: inputs.date.value,
+                            placeholder: 'YYYY-MM-DD',
+                            maxLength: 10,
+                            onChangeText: () => { }
+                        }} />
 
-            </View>
-            {/* </TouchableWithoutFeedback> */}
-            <View style={styles.buttons}>
-                <Button style={styles.button} mode="flat" onPress={onCancel}>Cancel</Button>
-                <Button style={styles.button} onPress={submitHandler}>{submitButtonLabel}</Button>
-            </View>
-        </ScrollView>
+                    {formIsInvalid && <Text style={styles.errorText}>Invalid input values - please check your entered date</Text>}
+
+                </View>
+                {/* </TouchableWithoutFeedback> */}
+                <View style={styles.buttons}>
+                    <Button style={styles.button} mode="flat" onPress={onCancel}>Cancel</Button>
+                    <Button style={styles.button} onPress={submitHandler}>{submitButtonLabel}</Button>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
+
     )
 }
 
 export default MemoryForm;
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    },
     form: {
         marginTop: 40,
     },
