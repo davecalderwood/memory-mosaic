@@ -1,20 +1,71 @@
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+
+// Components
+import ManageMemories from './screens/ManageMemories';
+import RecentMemories from './screens/RecentMemories';
+import AllMemories from './screens/AllMemories';
+import { GlobalStyles } from './constants/styles';
+import IconButton from './components/UI/IconButton';
+import MemoriesContextProvider from './store/MemoriesContext';
+
+const Stack = createStackNavigator();
+const BottomTabs = createBottomTabNavigator();
+
+function MemoriesOverview() {
+  return <BottomTabs.Navigator
+    screenOptions={({ navigation }) => ({
+      headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
+      headerTintColor: 'white',
+      tabBarStyle: { backgroundColor: GlobalStyles.colors.primary500 },
+      tabBarActiveTintColor: GlobalStyles.colors.accent500,
+      headerRight: ({ tintColor }) => (
+        <IconButton icon="add" size={24} color={tintColor} onPress={() => {
+          navigation.navigate('ManageMemory')
+        }} />
+      )
+    })}>
+    <BottomTabs.Screen
+      name="RecentMemories"
+      component={RecentMemories}
+      options={{
+        title: 'Recent Memories',
+        tabBarLabel: 'Recent Memories',
+        tabBarIcon: ({ color, size }) => <Ionicons name="hourglass" size={size} color={color} />
+      }}
+    />
+    <BottomTabs.Screen
+      name="AllMemories"
+      component={AllMemories}
+      options={{
+        title: 'All Memories',
+        tabBarLabel: 'All Memories',
+        tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />
+      }}
+    />
+  </BottomTabs.Navigator>
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <MemoriesContextProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{
+            headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
+            headerTintColor: 'white'
+          }}>
+            <Stack.Screen name="MemoriesOverview" component={MemoriesOverview} options={{ headerShown: false }} />
+            <Stack.Screen name="ManageMemory" component={ManageMemories} options={{
+              presentation: 'modal'
+            }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </MemoriesContextProvider>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
