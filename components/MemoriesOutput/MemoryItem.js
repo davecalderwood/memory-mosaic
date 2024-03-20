@@ -22,7 +22,7 @@ function MemoryItem({ id, title, photo, description, date }) {
             <View style={styles.memory}>
                 <Text style={[styles.textBase, styles.title]}>{title}</Text>
 
-                {photo && <Image source={photo} style={styles.photo} />}
+                {photo && <Image source={{ uri: photo }} style={styles.photo} />}
 
                 <View style={styles.descriptionContainer}>
                     <Text>{description}</Text>

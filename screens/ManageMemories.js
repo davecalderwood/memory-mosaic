@@ -32,6 +32,13 @@ function ManageMemories({ route, navigation }) {
         if (isEditing) {
             memoriesCtx.updateMemory(editedMemoryId, memoryData);
         } else {
+            // If a photo is selected, include its URI in the memory data
+            if (memoryData.photo) {
+                // Assuming the photo URI is stored in the 'photo' field of the memoryData object
+                const photoUri = memoryData.photo;
+                // Add the photo URI to the memory data before adding it
+                memoryData.photo = photoUri;
+            }
             memoriesCtx.addMemory(memoryData);
         }
 

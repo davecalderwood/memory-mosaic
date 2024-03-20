@@ -4,21 +4,21 @@ const DUMMY_DATA = [
     {
         id: 1,
         title: 'Photo 1',
-        photo: 'Actual Photo Here',
+        photo: null,
         description: 'Description of the first photo',
         date: new Date('2024-02-21')
     },
     {
         id: 2,
         title: 'Photo 2',
-        photo: 'Actual Photo Here',
+        photo: null,
         description: 'Description of the second photo. This is an example of a long description of our trip. Here we can see what it looks like when the description is super long. Description of the second photo. This is an example of a long description of our trip. Here we can see what it looks like when the description is super long.',
         date: new Date('2024-03-19')
     },
     {
         id: 3,
         title: 'Photo 3',
-        photo: 'Actual Photo Here',
+        photo: null,
         description: 'Description of the third photo',
         date: new Date('2024-03-20')
     },

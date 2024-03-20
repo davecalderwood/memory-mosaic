@@ -1,18 +1,21 @@
-import { StyleSheet, View, Keyboard, Text } from "react-native";
+import { StyleSheet, View, Keyboard, Text, Image } from "react-native";
 import Input from "./Input";
 import { useState } from "react";
 import Button from "../UI/Button";
 import { GlobalStyles } from "../../constants/styles";
 import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
+import * as ImagePicker from 'expo-image-picker';
 
-
-function MemoryForm({ onCancel, onSubmit, submitButtonLabel, defaultValues }) {
+function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultValues }) {
     const [inputs, setInputs] = useState({
         title: {
             value: defaultValues ? defaultValues.title : '',
             isValid: true
         },
-        photo: '',
+        photo: {
+            value: defaultValues ? defaultValues.photo : null,
+            isValid: true
+        },
         description: {
             value: defaultValues ? defaultValues.description : '',
             isValid: true
@@ -32,26 +35,62 @@ function MemoryForm({ onCancel, onSubmit, submitButtonLabel, defaultValues }) {
         });
     }
 
+    async function selectPhoto() {
+        try {
+            // Request permission to access photo library
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                alert('Permission to access photo library is required.');
+                return;
+            }
+
+            // Launch image picker
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
+
+            console.log('Image picker result:', result);
+
+            // Update inputs state with selected photo URI
+            if (!result.cancelled && result.assets.length > 0 && result.assets[0].uri) {
+                console.log('Selected photo URI:', result.assets[0].uri);
+                setInputs(prevInputs => ({
+                    ...prevInputs,
+                    photo: result.assets[0].uri,
+                }));
+            } else {
+                console.log('Image selection cancelled or URI not available.');
+            }
+        } catch (error) {
+            console.error('Error selecting photo:', error);
+        }
+    }
+
     function submitHandler() {
         const memoryData = {
             title: inputs.title.value,
-            photo: '',
+            photo: inputs.photo,
             description: inputs.description.value,
-            date: new Date(inputs.date.value),
+            // date: new Date(inputs.date.value),
+            date: new Date(),
         }
 
         const titleIsValid = memoryData.title.trim().length > 0;
         const descriptionIsValid = memoryData.description.trim().length > 0;
         const dateIsValid = memoryData.date.toString() !== 'Invalid Date';
+        const photoIsValid = memoryData.photo.trim().length > 0;
 
-        if (!titleIsValid && !descriptionIsValid && !dateIsValid) {
-            setInputs((currentInputs) => {
-                return {
-                    title: { value: currentInputs.title.value, isValid: titleIsValid },
-                    description: { value: currentInputs.description.value, isValid: descriptionIsValid },
-                    date: { value: currentInputs.date.value, isValid: dateIsValid },
-                }
-            })
+        if (!titleIsValid || !descriptionIsValid || !photoIsValid) { // add date validation
+            setInputs((currentInputs) => ({
+                ...currentInputs,
+                title: { value: currentInputs.title.value, isValid: titleIsValid },
+                description: { value: currentInputs.description.value, isValid: descriptionIsValid },
+                date: { value: currentInputs.date.value, isValid: dateIsValid },
+                photo: { value: currentInputs.photo.value, isValid: photoIsValid }
+            }));
             return;
         }
 
@@ -62,45 +101,48 @@ function MemoryForm({ onCancel, onSubmit, submitButtonLabel, defaultValues }) {
 
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={styles.form}>
-                    <Input
-                        label="Title"
-                        invalid={!inputs.title.isValid}
-                        textInputConfig={{
-                            onChangeText: inputChangedHandler.bind(this, 'title'),
-                            value: inputs.title.value,
-                            placeholder: "Give your memory a name!"
-                        }}
-                    />
+            {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}> */}
+            <View style={styles.form}>
+                <Input
+                    label="Title"
+                    invalid={!inputs.title.isValid}
+                    textInputConfig={{
+                        onChangeText: inputChangedHandler.bind(this, 'title'),
+                        value: inputs.title.value,
+                        placeholder: "Give your memory a name!"
+                    }}
+                />
 
-                    <Input label="Photo" />
+                {/* {inputs.photo && <Image source={{ uri: inputs.photo }} style={styles.photoPreview} />} */}
+                {inputs.photo && <Image source={{ uri: isEditing ? inputs.photo.value : inputs.photo }} style={styles.photoPreview} />}
 
-                    <Input
-                        label="Description"
-                        invalid={!inputs.description.isValid}
-                        textInputConfig={{
-                            onChangeText: inputChangedHandler.bind(this, 'description'),
-                            value: inputs.description.value,
-                            placeholder: "Describe the Memory!",
-                            multiline: true
-                        }} />
+                <Button onPress={selectPhoto} title="Select Photo" />
 
-                    <Input
-                        label="Date"
-                        invalid={!inputs.date.isValid}
-                        textInputConfig={{
-                            onChangeText: inputChangedHandler.bind(this, 'date'),
-                            value: inputs.date.value,
-                            placeholder: 'YYYY-MM-DD',
-                            maxLength: 10,
-                            onChangeText: () => { }
-                        }} />
+                <Input
+                    label="Description"
+                    invalid={!inputs.description.isValid}
+                    textInputConfig={{
+                        onChangeText: inputChangedHandler.bind(this, 'description'),
+                        value: inputs.description.value,
+                        placeholder: "Describe the Memory!",
+                        multiline: true
+                    }} />
 
-                    {formIsInvalid && <Text style={styles.errorText}>Invalid input values - please check your entered date</Text>}
+                <Input
+                    label="Date"
+                    invalid={!inputs.date.isValid}
+                    textInputConfig={{
+                        onChangeText: inputChangedHandler.bind(this, 'date'),
+                        value: inputs.date.value,
+                        placeholder: 'YYYY-MM-DD',
+                        maxLength: 10,
+                        onChangeText: () => { }
+                    }} />
 
-                </View>
-            </TouchableWithoutFeedback>
+                {formIsInvalid && <Text style={styles.errorText}>Invalid input values - please check your entered date</Text>}
+
+            </View>
+            {/* </TouchableWithoutFeedback> */}
             <View style={styles.buttons}>
                 <Button style={styles.button} mode="flat" onPress={onCancel}>Cancel</Button>
                 <Button style={styles.button} onPress={submitHandler}>{submitButtonLabel}</Button>
@@ -129,5 +171,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: GlobalStyles.colors.error500,
         margin: 8
-    }
+    },
+    photoPreview: {
+        width: 200,
+        height: 200,
+        marginTop: 10,
+        marginBottom: 20,
+        resizeMode: 'cover',
+    },
 })
