@@ -1,12 +1,17 @@
-import { useContext, useLayoutEffect } from 'react';
+import { useContext, useLayoutEffect, useState } from 'react';
 import IconButton from '../components/UI/IconButton'
 import { GlobalStyles } from '../constants/styles';
 import { View, StyleSheet } from 'react-native';
 import { MemoriesContext } from '../store/MemoriesContext';
 import MemoryForm from '../components/ManageMemory/MemoryForm';
+import { deleteMemory, storeMemory, updateMemory } from '../util/http';
+import LoadingOverlay from '../components/UI/LoadingOverlay';
+import ErrorOverlay from '../components/UI/ErrorOverlay';
 
 function ManageMemories({ route, navigation }) {
     const memoriesCtx = useContext(MemoriesContext);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState();
 
     const editedMemoryId = route.params?.memoryId;
     const isEditing = !!editedMemoryId;
@@ -19,30 +24,56 @@ function ManageMemories({ route, navigation }) {
         })
     }, [navigation, isEditing]);
 
-    function deleteMemoryHandler() {
-        memoriesCtx.deleteMemory(editedMemoryId);
-        navigation.goBack();
+    async function deleteMemoryHandler() {
+        setIsSubmitting(true);
+        try {
+            await deleteMemory(editedMemoryId);
+            memoriesCtx.deleteMemory(editedMemoryId);
+            navigation.goBack();
+        } catch (error) {
+            setError('Error while trying to delete a memory');
+            setIsSubmitting(false);
+        }
     }
 
     function cancelHandler() {
         navigation.goBack();
     }
 
-    function confirmHandler(memoryData) {
-        if (isEditing) {
-            memoriesCtx.updateMemory(editedMemoryId, memoryData);
-        } else {
-            // If a photo is selected, include its URI in the memory data
-            if (memoryData.photo) {
-                // Assuming the photo URI is stored in the 'photo' field of the memoryData object
-                const photoUri = memoryData.photo;
-                // Add the photo URI to the memory data before adding it
-                memoryData.photo = photoUri;
+    async function confirmHandler(memoryData) {
+        setIsSubmitting(true);
+        try {
+            if (isEditing) {
+                if (memoryData.photo) {
+                    const photoUri = memoryData.photo;
+                    memoryData.photo = photoUri;
+                }
+                memoriesCtx.updateMemory(editedMemoryId, memoryData);
+                await updateMemory(editedMemoryId, memoryData);
+            } else {
+                if (memoryData.photo) {
+                    const photoUri = memoryData.photo;
+                    memoryData.photo = photoUri;
+                }
+                const id = await storeMemory(memoryData);
+                memoriesCtx.addMemory({ ...memoryData, id: id });
             }
-            memoriesCtx.addMemory(memoryData);
+            navigation.goBack();
+        } catch (error) {
+            setError('Could not save data - please try again later');
+            setIsSubmitting(false);
         }
+    }
 
-        navigation.goBack();
+    function errorHandler() {
+        setError(null);
+    }
+
+    if (error && !isSubmitting) {
+        return <ErrorOverlay message={error} onConfirm={errorHandler} />
+    }
+    if (isSubmitting) {
+        return <LoadingOverlay />
     }
 
     return (

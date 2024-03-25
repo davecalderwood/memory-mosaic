@@ -1,32 +1,9 @@
 import { createContext, useReducer } from "react";
 
-const DUMMY_DATA = [
-    {
-        id: 1,
-        title: 'Photo 1',
-        photo: null,
-        description: 'Description of the first photo',
-        date: new Date('2024-02-21')
-    },
-    {
-        id: 2,
-        title: 'Photo 2',
-        photo: null,
-        description: 'Description of the second photo. This is an example of a long description of our trip. Here we can see what it looks like when the description is super long. Description of the second photo. This is an example of a long description of our trip. Here we can see what it looks like when the description is super long.',
-        date: new Date('2024-03-19')
-    },
-    {
-        id: 3,
-        title: 'Photo 3',
-        photo: null,
-        description: 'Description of the third photo',
-        date: new Date('2024-03-20')
-    },
-]
-
 export const MemoriesContext = createContext({
     memories: [],
     addMemory: ({ title, photo, description }) => { },
+    setMemories: (memories) => { },
     deleteMemory: (id) => { },
     updateMemory: (id, { title, photo, description }) => { },
 });
@@ -39,8 +16,10 @@ function generateGUID() {
 function memoriesReducer(state, action) {
     switch (action.type) {
         case 'ADD':
-            const id = generateGUID()
-            return [{ ...action.payload, id: id }, ...state]
+            return [action.payload, ...state]
+        case 'SET':
+            const inverted = action.payload.reverse();
+            return inverted;
         case 'UPDATE':
             const updatableMemoryIndex = state.findIndex((memory) => memory.id === action.payload.id);
             const updatableMemory = state[updatableMemoryIndex];
@@ -56,10 +35,14 @@ function memoriesReducer(state, action) {
 }
 
 function MemoriesContextProvider({ children }) {
-    const [memoriesState, dispatch] = useReducer(memoriesReducer, DUMMY_DATA);
+    const [memoriesState, dispatch] = useReducer(memoriesReducer, []);
 
     function addMemory(memoryData) {
         dispatch({ type: 'ADD', payload: memoryData });
+    }
+
+    function setMemories(memories) {
+        dispatch({ type: 'SET', payload: memories })
     }
 
     function deleteMemory(id) {
@@ -72,6 +55,7 @@ function MemoriesContextProvider({ children }) {
 
     const value = {
         memories: memoriesState,
+        setMemories: setMemories,
         addMemory: addMemory,
         deleteMemory: deleteMemory,
         updateMemory: updateMemory

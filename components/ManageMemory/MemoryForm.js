@@ -7,6 +7,7 @@ import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handl
 import * as ImagePicker from 'expo-image-picker';
 
 function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultValues }) {
+    console.log(defaultValues)
     const [inputs, setInputs] = useState({
         title: {
             value: defaultValues ? defaultValues.title : '',
@@ -25,6 +26,7 @@ function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultV
             isValid: true
         },
     });
+    const [editFormChanged, setEditFormChanged] = useState(false);
 
     function inputChangedHandler(inputIdentifier, inputValue) {
         setInputs((currentInputs) => {
@@ -61,6 +63,7 @@ function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultV
                     ...prevInputs,
                     photo: result.assets[0].uri,
                 }));
+                setEditFormChanged(true)
             } else {
                 console.log('Image selection cancelled or URI not available.');
             }
@@ -72,7 +75,7 @@ function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultV
     function submitHandler() {
         const memoryData = {
             title: inputs.title.value,
-            photo: inputs.photo,
+            photo: inputs.photo.value || inputs.photo,
             description: inputs.description.value,
             // date: new Date(inputs.date.value),
             date: new Date(),
@@ -81,6 +84,7 @@ function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultV
         const titleIsValid = memoryData.title.trim().length > 0;
         const descriptionIsValid = memoryData.description.trim().length > 0;
         const dateIsValid = memoryData.date.toString() !== 'Invalid Date';
+        // const photoIsValid = isEditing ? memoryData.photo.value.trim().length > 0 : memoryData.photo.trim().length > 0;
         const photoIsValid = memoryData.photo.trim().length > 0;
 
         if (!titleIsValid || !descriptionIsValid || !photoIsValid) { // add date validation
@@ -120,7 +124,8 @@ function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultV
                     />
 
                     {/* {inputs.photo && <Image source={{ uri: inputs.photo }} style={styles.photoPreview} />} */}
-                    {inputs.photo && <Image source={{ uri: isEditing ? inputs.photo.value : inputs.photo }} style={styles.photoPreview} />}
+                    {inputs.photo && !editFormChanged && <Image source={{ uri: isEditing ? inputs.photo.value : inputs.photo }} style={styles.photoPreview} />}
+                    {inputs.photo && editFormChanged && <Image source={{ uri: inputs.photo }} style={styles.photoPreview} />}
 
                     <Button onPress={selectPhoto} title="Select Photo" />
 
