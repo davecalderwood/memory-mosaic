@@ -11,6 +11,7 @@ import AllMemories from './screens/AllMemories';
 import { GlobalStyles } from './constants/styles';
 import IconButton from './components/UI/IconButton';
 import MemoriesContextProvider from './store/MemoriesContext';
+import MemoryDetailScreen from './screens/MemoryDetails';
 
 const Stack = createStackNavigator();
 const BottomTabs = createBottomTabNavigator();
@@ -60,9 +61,8 @@ export default function App() {
             headerTintColor: 'white'
           }}>
             <Stack.Screen name="MemoriesOverview" component={MemoriesOverview} options={{ headerShown: false }} />
-            <Stack.Screen name="ManageMemory" component={ManageMemories} options={{
-              presentation: 'modal'
-            }} />
+            <Stack.Screen name="MemoryDetail" component={MemoryDetailScreen} options={({ route }) => ({ title: route.params?.selectedMemoryTitle })} />
+            <Stack.Screen name="ManageMemory" component={ManageMemories} options={{ presentation: 'modal' }} />
           </Stack.Navigator>
         </NavigationContainer>
       </MemoriesContextProvider>

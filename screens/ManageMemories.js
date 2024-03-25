@@ -29,7 +29,8 @@ function ManageMemories({ route, navigation }) {
         try {
             await deleteMemory(editedMemoryId);
             memoriesCtx.deleteMemory(editedMemoryId);
-            navigation.goBack();
+            setIsSubmitting(false);
+            navigation.navigate('MemoriesOverview');
         } catch (error) {
             setError('Error while trying to delete a memory');
             setIsSubmitting(false);
@@ -58,7 +59,8 @@ function ManageMemories({ route, navigation }) {
                 const id = await storeMemory(memoryData);
                 memoriesCtx.addMemory({ ...memoryData, id: id });
             }
-            navigation.goBack();
+            // navigation.goBack();
+            navigation.navigate('MemoriesOverview');
         } catch (error) {
             setError('Could not save data - please try again later');
             setIsSubmitting(false);

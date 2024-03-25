@@ -6,8 +6,9 @@ function MemoryItem({ id, title, photo, description, date }) {
     const navigation = useNavigation();
 
     function memoryPressHandler() {
-        navigation.navigate('ManageMemory', {
-            memoryId: id
+        navigation.navigate('MemoryDetail', {
+            memoryId: id,
+            selectedMemoryTitle: title
         })
     }
 

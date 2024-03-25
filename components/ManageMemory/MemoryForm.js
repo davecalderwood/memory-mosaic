@@ -7,7 +7,6 @@ import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handl
 import * as ImagePicker from 'expo-image-picker';
 
 function MemoryForm({ onCancel, isEditing, onSubmit, submitButtonLabel, defaultValues }) {
-    console.log(defaultValues)
     const [inputs, setInputs] = useState({
         title: {
             value: defaultValues ? defaultValues.title : '',
